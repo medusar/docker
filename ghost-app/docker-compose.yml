@@ -1,0 +1,41 @@
+version: '3'
+
+networks:
+ ghost:
+
+services:
+ ghost-app:
+  image: ghost:1-alpine
+  networks:
+   - ghost
+  ports:
+   - "2368:2368"
+  depends_on:
+   - db
+  environment:
+   database__client: mysql
+   database__connection__host: db
+   database__connection__user: ghost
+   database__connection__password: ghost
+   database__connection__database: ghost
+
+ nginx:
+  build: nginx
+  networks:
+   - ghost
+  ports:
+   - "80:80"
+  depends_on:
+   - ghost-app
+
+ db:
+  image: "mysql:5.7.15"
+  networks:
+   - ghost
+  environment:
+   MYSQL_ROOT_PASSWORD: root
+   MYSQL_USER: ghost
+   MYSQL_PASSWORD: ghost
+   MYSQL_DATABASE: ghost
+  volumes:
+   - $PWD/data:/var/lib/mysql
